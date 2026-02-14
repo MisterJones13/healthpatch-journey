@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serif Heading Flow - Two Options</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Inter for body -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Serif Option 1: Cormorant Garamond -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Serif Option 2: Fraunces -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-primary: #14b8a6;
+            --color-secondary: #fda4af;
+            --color-primary-light: #2dd4bf;
+            --color-secondary-light: #fecdd3;
+            --progress-height: 2px;
+            --orb-size-mobile: 180px;
+            --orb-size-390: 200px;
+            --orb-size-tablet: 240px;
+            --orb-size-desktop: 280px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            background-image: radial-gradient(
+                ellipse 900px 700px at 50% 30%,
+                rgba(20, 184, 166, 0.25) 0%,
+                rgba(253, 164, 175, 0.18) 40%,
+                rgba(10, 10, 10, 0) 75%
+            );
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+        }
+
+        /* Serif Options */
+        .serif-cormorant {
+            --font-heading: 'Cormorant Garamond', serif;
+        }
+
+        .serif-fraunces {
+            --font-heading: 'Fraunces', serif;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--progress-height);
+            background: rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            width: 25%;
+            transition: width 0.6s ease;
+        }
+
+        /* Container */
+        .container {
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: calc(var(--progress-height) + 20px) 20px 20px;
+        }
+
+        /* Orb Container */
+        .orb-container {
+            position: relative;
+            width: var(--orb-size-mobile);
+            height: var(--orb-size-mobile);
+            flex-shrink: 0;
+            margin-bottom: 24px;
+        }
+
+        /* Initial state - only core hidden */
+        .orb-container.initial .core {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        /* Flower layers are visible from start, just breathing */
+        .orb-container.initial .flower-layer {
+            opacity: 1;
+        }
+
+        @media (min-width: 390px) {
+            .orb-container {
+                width: var(--orb-size-390);
+                height: var(--orb-size-390);
+                margin-bottom: 28px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .orb-container {
+                width: var(--orb-size-tablet);
+                height: var(--orb-size-tablet);
+                margin-bottom: 36px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .orb-container {
+                width: var(--orb-size-desktop);
+                height: var(--orb-size-desktop);
+                margin-bottom: 48px;
+            }
+        }
+
+        /* Orb States */
+        .orb-container.thinking .flower-layer {
+            animation-duration: 3s !important;
+        }
+
+        .orb-container.speaking .core circle {
+            animation: speakingPulse 0.8s ease-in-out infinite !important;
+        }
+
+        .orb-container.breathing .flower-layer {
+            animation-duration: 10s !important;
+        }
+
+        .orb-container.breathing .core circle {
+            animation: breathingCore 10s ease-in-out infinite !important;
+        }
+
+        /* Breathing expansion on count of 3 - using outer glow instead of scale */
+        .orb-container.expand-breathe {
+            /* Don't scale the whole container anymore */
+        }
+
+        .orb-container.expand-breathe .flower-layer {
+            animation-duration: 1.5s !important;
+        }
+
+        .orb-container.expand-breathe .core circle {
+            animation: expandCore 1.5s ease-in-out infinite !important;
+        }
+
+        /* Outer glow ring that expands */
+        .breath-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(20, 184, 166, 0.4) 0%,
+                rgba(20, 184, 166, 0.3) 30%,
+                rgba(253, 164, 175, 0.2) 60%,
+                transparent 80%
+            );
+            opacity: 0;
+            filter: blur(25px);
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Expanding state */
+        .orb-container.expand-breathe .breath-glow {
+            animation: breathExpand 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Contracting state */
+        .orb-container.contract-breathe .breath-glow {
+            animation: breathContract 1.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+        }
+
+        @keyframes breathExpand {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(2.5);
+            }
+        }
+
+        @keyframes breathContract {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(2.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes speakingPulse {
+            0%, 100% { r: 26px; opacity: 0.5; }
+            50% { r: 30px; opacity: 0.8; }
+        }
+
+        @keyframes breathingCore {
+            0%, 100% { r: 24px; opacity: 0.5; }
+            50% { r: 32px; opacity: 0.9; }
+        }
+
+        @keyframes expandCore {
+            0%, 100% { r: 38px; opacity: 0.85; }
+            50% { r: 44px; opacity: 1; }
+        }
+
+        /* Birth animation - only core with dramatic overshoot */
+        @keyframes birthCore {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            75% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.4);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Bloom state - only animates core */
+        .orb-container.blooming .core {
+            animation: birthCore 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Orb States */
+        .orb-container.thinking .flower-layer {
+            animation-duration: 3s !important;
+        }
+
+        .orb-container.speaking .core circle {
+            animation: speakingPulse 0.8s ease-in-out infinite !important;
+        }
+
+        @keyframes speakingPulse {
+            0%, 100% { r: 26px; opacity: 0.5; }
+            50% { r: 30px; opacity: 0.8; }
+        }
+
+        /* Flower Layers */
+        .flower-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .flower-layer-1 { z-index: 3; }
+        .flower-layer-2 { z-index: 2; opacity: 0.85; }
+        .flower-layer-3 { z-index: 1; opacity: 0.6; }
+
+        .petal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+        }
+
+        .flower-layer-1 .petal { animation: petalBloom1 12s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        .flower-layer-1 .petal circle { filter: blur(6px); }
+        .flower-layer-2 .petal { animation: petalBloom2 12s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.2s; }
+        .flower-layer-2 .petal circle { filter: blur(10px); }
+        .flower-layer-3 .petal { animation: petalBloom3 12s cubic-bezier(0.4, 0, 0.2, 1) infinite 2s; }
+        .flower-layer-3 .petal circle { filter: blur(14px); }
+
+        .petal:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg); --base-rotation: 0deg; }
+        .petal:nth-child(2) { transform: translate(-50%, -50%) rotate(60deg); --base-rotation: 60deg; }
+        .petal:nth-child(3) { transform: translate(-50%, -50%) rotate(120deg); --base-rotation: 120deg; }
+        .petal:nth-child(4) { transform: translate(-50%, -50%) rotate(180deg); --base-rotation: 180deg; }
+        .petal:nth-child(5) { transform: translate(-50%, -50%) rotate(240deg); --base-rotation: 240deg; }
+        .petal:nth-child(6) { transform: translate(-50%, -50%) rotate(300deg); --base-rotation: 300deg; }
+
+        @keyframes petalBloom1 {
+            0% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) rotate(calc(var(--base-rotation) + 35deg)) translateY(-65px) scale(1.08); opacity: 0.75; }
+            100% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes petalBloom2 {
+            0% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translate(-50%, -50%) rotate(calc(var(--base-rotation) + 30deg)) translateY(-60px) scale(1.05); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 0.8; }
+        }
+
+        @keyframes petalBloom3 {
+            0% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) rotate(calc(var(--base-rotation) + 25deg)) translateY(-55px) scale(1.03); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) rotate(var(--base-rotation)) translateY(0) scale(1); opacity: 0.6; }
+        }
+
+        .core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        .core circle {
+            animation: coreSync 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes coreSync {
+            0%, 100% { r: 28px; opacity: 0.6; }
+            50% { r: 24px; opacity: 0.85; }
+        }
+
+        .petal:nth-child(odd) circle { fill: var(--color-primary); }
+        .petal:nth-child(even) circle { fill: var(--color-secondary); }
+        .flower-layer-1 .petal:nth-child(odd) circle { fill: var(--color-primary); }
+        .flower-layer-1 .petal:nth-child(even) circle { fill: var(--color-secondary); }
+        .flower-layer-2 .petal:nth-child(odd) circle { fill: var(--color-primary-light); }
+        .flower-layer-2 .petal:nth-child(even) circle { fill: var(--color-secondary-light); }
+        .flower-layer-3 .petal:nth-child(odd) circle { fill: var(--color-primary); }
+        .flower-layer-3 .petal:nth-child(even) circle { fill: var(--color-primary-light); }
+        .core circle { fill: var(--color-primary-light); }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+        }
+
+        /* Thinking Indicator */
+        .thinking-indicator {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 32px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            letter-spacing: 4px;
+            min-height: 30px;
+        }
+
+        .thinking-indicator.show {
+            opacity: 1;
+        }
+
+        .thinking-indicator .dot {
+            display: inline-block;
+            opacity: 0;
+        }
+
+        .thinking-indicator.show .dot {
+            animation: dotCycle 1s ease-in-out infinite;
+        }
+
+        .thinking-indicator.show .dot:nth-child(1) { animation-delay: 0s; }
+        .thinking-indicator.show .dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-indicator.show .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotCycle {
+            0% { opacity: 0; transform: translateY(0); }
+            15% { opacity: 1; transform: translateY(-4px); }
+            30% { opacity: 1; transform: translateY(0); }
+            45% { opacity: 0.4; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+        }
+
+        /* Text Group Container */
+        .text-group {
+            text-align: center;
+            margin-bottom: 32px;
+            min-height: 180px;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        .text-group.fade-out {
+            opacity: 0;
+        }
+
+        /* Serif Heading (first sentence) */
+        .text-group h2 {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            font-weight: 500;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            opacity: 0.98;
+            letter-spacing: -0.01em;
+        }
+
+        /* Inter Body (subsequent sentences) */
+        .text-group p {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            font-weight: 400;
+            margin-bottom: 12px;
+            opacity: 0.92;
+        }
+
+        .text-group p:last-child {
+            margin-bottom: 0;
+        }
+
+        .text-group p.light {
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        @media (min-width: 390px) {
+            .text-group h2 { font-size: 24px; }
+            .text-group p { font-size: 17px; }
+        }
+
+        @media (min-width: 768px) {
+            .text-group h2 { font-size: 28px; margin-bottom: 24px; }
+            .text-group p { font-size: 18px; margin-bottom: 14px; }
+        }
+
+        @media (min-width: 1024px) {
+            .text-group h2 { font-size: 32px; }
+            .text-group p { font-size: 19px; }
+        }
+
+        /* Quiz Options */
+        .quiz-options {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .quiz-options.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .option-btn {
+            width: 100%;
+            min-height: 52px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.4;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        @media (min-width: 390px) {
+            .option-btn { font-size: 15px; padding: 16px 20px; }
+        }
+
+        @media (min-width: 768px) {
+            .option-btn { font-size: 16px; min-height: 56px; }
+        }
+
+        /* Consent Options */
+        .consent-options {
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .consent-options.visible {
+            display: flex;
+        }
+
+        .consent-btn {
+            flex: 1;
+            min-height: 56px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid;
+            opacity: 0;
+            transform: translateY(15px) scale(0.95);
+        }
+
+        /* Sequential reveal animations - positive first */
+        .consent-btn.consent-yes {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+            animation: revealButtonPositive 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .consent-btn.consent-no {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            animation: revealButtonNegative 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+        }
+
+        @keyframes revealButtonPositive {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            60% {
+                transform: translateY(-3px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes revealButtonNegative {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            60% {
+                transform: translateY(-2px) scale(1.01);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .consent-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+        }
+
+        .consent-no:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .consent-btn { font-size: 16px; }
+        }
+
+        /* Email Capture */
+        .email-capture {
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+            margin-top: 32px;
+        }
+
+        .email-capture.visible {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .email-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .email-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Email buttons also get sequential reveal */
+        .email-buttons .consent-yes {
+            animation: revealButtonPositive 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .email-buttons .consent-no {
+            animation: revealButtonNegative 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+        }
+
+        /* Font Switcher */
+        .font-switcher {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 12px;
+        }
+
+        .font-btn {
+            padding: 10px 20px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .font-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .font-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .restart-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .restart-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .mute-btn {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            padding: 8px 16px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.2s;
+        }
+
+        .mute-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .mute-btn.muted {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body class="serif-fraunces">
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+
+    <!-- Restart Button -->
+    <button class="restart-btn" onclick="startConversation()">▶ Restart</button>
+
+    <!-- Audio Element -->
+    <audio id="binauralAudio" loop>
+        <source src="assets/audio/binaural-10hz.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Mute Button -->
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()">
+        <span id="muteIcon">🔊</span>
+    </button>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- Orb -->
+        <div class="orb-container initial" id="orb">
+            <!-- Breathing glow ring -->
+            <div class="breath-glow"></div>
+            
+            <div class="flower-layer flower-layer-1">
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.4"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.4"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.4"/></svg></div>
+            </div>
+            <div class="flower-layer flower-layer-2">
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.3"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.3"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.3"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.35"/></svg></div>
+            </div>
+            <div class="flower-layer flower-layer-3">
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.2"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.25"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.2"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.25"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.2"/></svg></div>
+                <div class="petal"><svg width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="40" opacity="0.25"/></svg></div>
+            </div>
+            <div class="core"><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="28" opacity="0.6"/></svg></div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Thinking Indicator -->
+            <div class="thinking-indicator" id="thinking">
+                <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+            </div>
+
+            <!-- Text Groups (fade in/out) -->
+            <div id="textContainer"></div>
+
+            <!-- Quiz Options -->
+            <div class="quiz-options" id="quizOptions">
+                <button class="option-btn">😌 Rust en kalmte in plaats van constant gespannen zijn</button>
+                <button class="option-btn">😴 Diepere slaap en uitgerust wakker worden</button>
+                <button class="option-btn">⚡ Meer energie en minder moeheid</button>
+                <button class="option-btn">🎯 Betere focus zonder mentale mist</button>
+            </div>
+
+            <!-- Consent Buttons (initial) -->
+            <div class="consent-options" id="consentInitial" style="display: none;">
+                <button class="consent-btn consent-yes" onclick="handleConsent('yes', 'initial')">Dat mag</button>
+                <button class="consent-btn consent-no" onclick="handleConsent('no', 'initial')">Liever niet</button>
+            </div>
+
+            <!-- Consent Buttons (second chance) -->
+            <div class="consent-options" id="consentSecond" style="display: none;">
+                <button class="consent-btn consent-yes" onclick="handleConsent('yes', 'second')">Oké, we gaan door</button>
+                <button class="consent-btn consent-no" onclick="handleConsent('no', 'second')">Nee, ik stop hier liever</button>
+            </div>
+
+            <!-- Email Capture -->
+            <div class="email-capture" id="emailCapture" style="display: none;">
+                <input type="email" class="email-input" id="emailInput" placeholder="je@email.nl">
+                <div class="email-buttons">
+                    <button class="consent-btn consent-yes" onclick="handleEmail('yes')">Ja, dat mag</button>
+                    <button class="consent-btn consent-no" onclick="handleEmail('no')">Nee, liever niet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const orb = document.getElementById('orb');
+        const thinking = document.getElementById('thinking');
+        const textContainer = document.getElementById('textContainer');
+        const quizOptions = document.getElementById('quizOptions');
+        const binauralAudio = document.getElementById('binauralAudio');
+        const muteBtn = document.getElementById('muteBtn');
+        const muteIcon = document.getElementById('muteIcon');
+
+        let isMuted = false;
+
+        // Toggle mute function
+        function toggleMute() {
+            isMuted = !isMuted;
+            binauralAudio.muted = isMuted;
+            muteIcon.textContent = isMuted ? '🔇' : '🔊';
+            muteBtn.classList.toggle('muted', isMuted);
+        }
+
+        // Audio fade in function
+        async function fadeInAudio(duration = 2500) {
+            binauralAudio.volume = 0;
+            binauralAudio.play().catch(err => {
+                console.log('Audio autoplay blocked:', err);
+                // If autoplay is blocked, show a play button or message
+            });
+            
+            const steps = 50;
+            const targetVolume = 0.15; // 15% volume
+            const increment = targetVolume / steps;
+            const stepDuration = duration / steps;
+            
+            for (let i = 0; i < steps; i++) {
+                await sleep(stepDuration);
+                binauralAudio.volume = Math.min(binauralAudio.volume + increment, targetVolume);
+            }
+        }
+
+        // Conversation groups with consent flow
+        const groups = [
+            // INTRO GROUP 1: Welcome
+            {
+                heading: { text: 'Hi, wat goed dat je mij hebt gevonden.', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Ik ben hier om naar je te luisteren.', speed: 10, pause: 1000 },
+                    { text: 'En om je wat vragen te stellen.', speed: 10, pause: 1800 }
+                ]
+            },
+            // GROUP 2: Recognition (updated)
+            {
+                heading: { text: 'Waarschijnlijk ben je hier omdat je ergens last van hebt.', speed: 12, pause: 1400 },
+                body: [
+                    { text: 'Een drukkend gevoel, dat dingen te veel zijn.', speed: 10, pause: 1200 },
+                    { text: 'Veel mensen die hier langskomen zitten met datzelfde gevoel.', speed: 10, pause: 2200 }
+                ]
+            },
+            // GROUP 3: Invitation to breathe (updated with breathing interaction)
+            {
+                heading: { text: 'Ik zou daar graag meer over horen van je.', speed: 12, pause: 1000 },
+                body: [
+                    { text: 'Maar voordat we beginnen...', speed: 10, pause: 800, light: true }
+                ]
+            },
+            {
+                heading: { text: 'Neem even een moment voor jezelf.', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Adem eerst één keer heel diep in op de tel van 3.', speed: 10, pause: 1400 }
+                ],
+                breathingCount: true // Special marker for breathing countdown
+            },
+            // GROUP 4: Ask permission
+            {
+                heading: { text: 'Nu we samen rust hebben gevonden, zou ik je graag een paar vragen stellen?', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Is dat oké?', speed: 10, pause: 800 }
+                ],
+                consent: 'initial' // Special marker for consent flow
+            }
+        ];
+
+        // Second chance groups (if initial consent = no)
+        const secondChanceGroups = [
+            {
+                heading: { text: 'Dat is jammer.', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Want zonder jouw antwoorden kan ik ook niet naar je luisteren.', speed: 10, pause: 1800 }
+                ]
+            },
+            {
+                heading: { text: 'Maar ik geloof dat ik je kan helpen.', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Geef je me nog één kans?', speed: 10, pause: 800 }
+                ],
+                consent: 'second' // Second chance consent
+            }
+        ];
+
+        // Final goodbye groups (if definitive no)
+        const goodbyeGroups = [
+            {
+                heading: { text: 'Wat jammer.', speed: 14, pause: 1200 },
+                body: [
+                    { text: 'Maar soms is het moment er gewoon niet voor.', speed: 10, pause: 2000 }
+                ]
+            },
+            {
+                heading: { text: 'Mag ik je misschien op een ander moment wat vragen stellen?', speed: 12, pause: 1200 },
+                body: [
+                    { text: 'Laat je email achter, dan neem ik over een tijdje contact op met je.', speed: 10, pause: 1000 },
+                    { text: 'Geen druk. Alleen als jij er klaar voor bent.', speed: 10, pause: 1200 }
+                ],
+                email: true // Email capture moment
+            }
+        ];
+
+        // Thank you / final goodbye
+        const thankYouGroup = {
+            heading: { text: 'Dank je.', speed: 14, pause: 1200 },
+            body: [
+                { text: 'Ik hoop je snel weer te zien.', speed: 10, pause: 2000 }
+            ],
+            fadeOut: true
+        };
+
+        const finalGoodbyeGroup = {
+            heading: { text: 'Daar heb ik begrip voor.', speed: 14, pause: 1200 },
+            body: [
+                { text: 'Je weet me te vinden als dat nodig is.', speed: 10, pause: 2000 }
+            ],
+            fadeOut: true
+        };
+
+        // First question group (after consent given)
+        const firstQuestionGroup = {
+            heading: { text: 'Naar welk gevoel ben je het meest op zoek?', speed: 12, pause: 800 },
+            body: []
+        };
+
+        async function startConversation() {
+            // Reset
+            textContainer.innerHTML = '';
+            quizOptions.classList.remove('visible');
+
+            // BLOOM SEQUENCE - Birth of the orb
+            orb.className = 'orb-container initial'; // Start hidden
+            await sleep(300);
+            
+            orb.classList.add('blooming'); // Trigger core growth
+            
+            // 🎵 Start audio fade in during bloom
+            fadeInAudio(2500); // 2.5 second fade in
+            
+            await sleep(2400); // Wait for core to finish (with dramatic overshoot)
+            
+            orb.classList.remove('initial', 'blooming'); // Done
+
+            // Initial thinking
+            orb.classList.add('thinking');
+            thinking.classList.add('show');
+            await sleep(2400);
+            
+            thinking.classList.remove('show');
+            await sleep(300);
+            orb.classList.remove('thinking');
+            orb.classList.add('speaking');
+
+            // Process main intro groups
+            await processGroups(groups);
+        }
+
+        let currentGroupDiv = null; // Track current group for button insertion
+
+        async function processGroups(groupsArray) {
+            for (let i = 0; i < groupsArray.length; i++) {
+                const group = groupsArray[i];
+
+                // Create text group container
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'text-group';
+                textContainer.appendChild(groupDiv);
+                currentGroupDiv = groupDiv; // Store for button insertion
+
+                // Type heading
+                const h2 = document.createElement('h2');
+                if (group.heading.light) h2.style.fontWeight = '400';
+                groupDiv.appendChild(h2);
+                await typeText(h2, group.heading.text, group.heading.speed);
+                await sleep(group.heading.pause);
+
+                // Type body sentences
+                for (let j = 0; j < group.body.length; j++) {
+                    const sentence = group.body[j];
+                    const p = document.createElement('p');
+                    if (sentence.light) p.classList.add('light');
+                    groupDiv.appendChild(p);
+                    await typeText(p, sentence.text, sentence.speed);
+                    await sleep(sentence.pause);
+                }
+
+                // Check for breathing countdown
+                if (group.breathingCount) {
+                    orb.classList.remove('speaking');
+                    await sleep(800);
+                    await doBreathingCountdown(groupDiv);
+                    await sleep(1000);
+                    orb.classList.add('speaking');
+                }
+
+                // Check for consent moment
+                if (group.consent === 'initial') {
+                    orb.classList.remove('speaking');
+                    await sleep(400);
+                    showConsentInline('initial', groupDiv);
+                    return; // Wait for user interaction
+                } else if (group.consent === 'second') {
+                    orb.classList.remove('speaking');
+                    await sleep(400);
+                    showConsentInline('second', groupDiv);
+                    return; // Wait for user interaction
+                } else if (group.email) {
+                    orb.classList.remove('speaking');
+                    orb.classList.add('breathing'); // Slower breathing for email
+                    await sleep(400);
+                    showEmailCaptureInline(groupDiv);
+                    return; // Wait for user interaction
+                }
+
+                // Fade out and continue
+                await sleep(500);
+                groupDiv.classList.add('fade-out');
+                await sleep(800);
+                groupDiv.remove();
+
+                // Show thinking between groups
+                if (i < groupsArray.length - 1) {
+                    orb.classList.remove('speaking');
+                    orb.classList.add('thinking');
+                    thinking.classList.add('show');
+                    await sleep(1800);
+                    thinking.classList.remove('show');
+                    await sleep(300);
+                    orb.classList.remove('thinking');
+                    orb.classList.add('speaking');
+                }
+            }
+        }
+
+        function showConsentInline(type, groupDiv) {
+            const container = document.createElement('div');
+            container.className = 'consent-options';
+            container.id = 'consent-' + type;
+            
+            const yesBtn = document.createElement('button');
+            yesBtn.className = 'consent-btn consent-yes';
+            yesBtn.onclick = () => handleConsent('yes', type);
+            yesBtn.textContent = type === 'initial' ? 'Dat mag' : 'Oké, we gaan door';
+            
+            const noBtn = document.createElement('button');
+            noBtn.className = 'consent-btn consent-no';
+            noBtn.onclick = () => handleConsent('no', type);
+            noBtn.textContent = type === 'initial' ? 'Liever niet' : 'Nee, ik stop hier liever';
+            
+            container.appendChild(yesBtn);
+            container.appendChild(noBtn);
+            groupDiv.appendChild(container);
+            
+            setTimeout(() => container.classList.add('visible'), 50);
+        }
+
+        function showEmailCaptureInline(groupDiv) {
+            const container = document.createElement('div');
+            container.className = 'email-capture';
+            container.id = 'email-inline';
+            
+            const input = document.createElement('input');
+            input.type = 'email';
+            input.className = 'email-input';
+            input.placeholder = 'je@email.nl';
+            input.id = 'emailInputInline';
+            
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'email-buttons';
+            
+            const yesBtn = document.createElement('button');
+            yesBtn.className = 'consent-btn consent-yes';
+            yesBtn.onclick = () => handleEmail('yes');
+            yesBtn.textContent = 'Ja, dat mag';
+            
+            const noBtn = document.createElement('button');
+            noBtn.className = 'consent-btn consent-no';
+            noBtn.onclick = () => handleEmail('no');
+            noBtn.textContent = 'Nee, liever niet';
+            
+            buttonsDiv.appendChild(yesBtn);
+            buttonsDiv.appendChild(noBtn);
+            container.appendChild(input);
+            container.appendChild(buttonsDiv);
+            groupDiv.appendChild(container);
+            
+            setTimeout(() => container.classList.add('visible'), 50);
+        }
+
+        async function handleConsent(answer, stage) {
+            // User made choice - proceed
+            
+            if (answer === 'yes') {
+                // User consented - proceed to questions
+                await fadeOutCurrentText();
+                orb.classList.add('thinking');
+                thinking.classList.add('show');
+                await sleep(1800);
+                thinking.classList.remove('show');
+                await sleep(300);
+                orb.classList.remove('thinking');
+                orb.classList.add('speaking');
+                
+                // Show first question
+                await processGroups([firstQuestionGroup]);
+                orb.classList.remove('speaking');
+                await sleep(400);
+                quizOptions.classList.add('visible');
+                
+            } else {
+                // User declined
+                if (stage === 'initial') {
+                    // First decline - show second chance
+                    await fadeOutCurrentText();
+                    orb.classList.add('thinking');
+                    thinking.classList.add('show');
+                    await sleep(1800);
+                    thinking.classList.remove('show');
+                    await sleep(300);
+                    orb.classList.remove('thinking');
+                    orb.classList.add('speaking');
+                    
+                    await processGroups(secondChanceGroups);
+                    
+                } else {
+                    // Second decline - show email capture
+                    await fadeOutCurrentText();
+                    orb.classList.add('thinking');
+                    thinking.classList.add('show');
+                    await sleep(1800);
+                    thinking.classList.remove('show');
+                    await sleep(300);
+                    orb.classList.remove('thinking');
+                    orb.classList.add('speaking');
+                    
+                    await processGroups(goodbyeGroups);
+                }
+            }
+        }
+
+        async function handleEmail(answer) {
+            if (answer === 'yes') {
+                // Capture email
+                const emailInput = document.getElementById('emailInputInline');
+                const email = emailInput ? emailInput.value : '';
+                console.log('Email captured:', email); // In real app: send to backend
+                
+                // Show thank you
+                await fadeOutCurrentText();
+                orb.classList.remove('breathing');
+                orb.classList.add('speaking');
+                await processGroups([thankYouGroup]);
+                
+                // Fade out orb
+                await sleep(1000);
+                await fadeOutOrb();
+                
+            } else {
+                // Final goodbye
+                await fadeOutCurrentText();
+                orb.classList.remove('breathing');
+                orb.classList.add('speaking');
+                await processGroups([finalGoodbyeGroup]);
+                
+                // Fade out orb
+                await sleep(1000);
+                await fadeOutOrb();
+            }
+        }
+
+        async function doBreathingCountdown(groupDiv) {
+            // Create countdown container
+            const countdownDiv = document.createElement('div');
+            countdownDiv.style.textAlign = 'center';
+            countdownDiv.style.marginTop = '40px';
+            groupDiv.appendChild(countdownDiv);
+            
+            const countText = document.createElement('h2');
+            countText.style.fontSize = '48px';
+            countText.style.fontWeight = '300';
+            countText.style.opacity = '0';
+            countText.style.transition = 'opacity 0.3s ease';
+            countdownDiv.appendChild(countText);
+            
+            // Count: 1
+            await sleep(800);
+            countText.textContent = '1';
+            countText.style.opacity = '1';
+            await sleep(1200);
+            countText.style.opacity = '0';
+            
+            // Count: 2
+            await sleep(400);
+            countText.textContent = '2';
+            countText.style.opacity = '1';
+            await sleep(1200);
+            countText.style.opacity = '0';
+            
+            // Count: 3 - ORB EXPANDS
+            await sleep(400);
+            countText.textContent = '3';
+            countText.style.opacity = '1';
+            
+            // EXPAND ORB
+            orb.classList.add('expand-breathe');
+            await sleep(3000); // Hold expansion longer - feel the breath
+            
+            // RETURN TO NORMAL (use contract animation)
+            orb.classList.remove('expand-breathe');
+            orb.classList.add('contract-breathe');
+            await sleep(1500);
+            orb.classList.remove('contract-breathe');
+            
+            countText.style.opacity = '0';
+            await sleep(400);
+        }
+
+        async function fadeOutCurrentText() {
+            const groups = textContainer.querySelectorAll('.text-group');
+            groups.forEach(g => g.classList.add('fade-out'));
+            await sleep(800);
+            textContainer.innerHTML = '';
+        }
+
+        async function fadeOutOrb() {
+            orb.style.transition = 'opacity 2s ease';
+            orb.style.opacity = '0';
+            await sleep(2000);
+        }
+
+        async function typeText(element, text, baseSpeed) {
+            let displayedText = '';
+            let burstCounter = 0;
+            const words = text.split(' ');
+            let currentWordIndex = 0;
+            let letterInWord = 0;
+            
+            for (let i = 0; i < text.length; i++) {
+                displayedText += text[i];
+                element.textContent = displayedText;
+
+                let delay = baseSpeed;
+                
+                // 1. PUNCTUATION PAUSES (natural breath points)
+                if (text[i] === '.') {
+                    delay = baseSpeed * 2 + (Math.random() * 200 + 200); // 300-400ms extra
+                } else if (text[i] === ',' || text[i] === '?') {
+                    delay = baseSpeed * 2 + (Math.random() * 100 + 150); // 150-250ms extra
+                } else if (text[i] === ' ') {
+                    // Space between words
+                    delay = baseSpeed * 0.4 + (Math.random() * 30); // Quick but varied
+                    currentWordIndex++;
+                    letterInWord = 0;
+                } else {
+                    // Regular letter
+                    letterInWord++;
+                    
+                    // 2. BURST PATTERN (3-5 quick letters, then micro-pause)
+                    burstCounter++;
+                    if (burstCounter >= 3 && Math.random() > 0.4) {
+                        // Micro-pause after burst
+                        delay = baseSpeed + (Math.random() * 80 + 40); // 40-120ms pause
+                        burstCounter = 0;
+                    } else {
+                        // Inside burst - faster
+                        delay = baseSpeed * 0.85;
+                    }
+                    
+                    // 3. WORD LENGTH AWARENESS
+                    const currentWord = words[currentWordIndex] || '';
+                    if (currentWord.length > 8) {
+                        delay = delay * 1.15; // Slow down on long words
+                    } else if (currentWord.length <= 3) {
+                        delay = delay * 0.9; // Speed up short words
+                    }
+                    
+                    // 4. RANDOM "THINK" PAUSES (10% chance mid-word)
+                    if (letterInWord > 2 && Math.random() > 0.9) {
+                        delay = delay + (Math.random() * 100 + 50); // 50-150ms think pause
+                    }
+                    
+                    // 5. LARGE VARIATION (human inconsistency)
+                    delay = delay + (Math.random() * 30 - 15); // ±15ms base variation
+                }
+
+                await sleep(delay);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Auto-start
+        window.addEventListener('load', () => {
+            setTimeout(startConversation, 500);
+        });
+    </script>
+</body>
+</html>
